@@ -72,7 +72,7 @@ class _MainScreenState extends State<MainScreen>{
                                   size: 75,
                                 )),
                             const SizedBox(width: 1, height: 2),
-                            const Text("User name"),
+                            const Text("User name",),
                             const SizedBox(width: 1, height: 10),
                             const Text("user@email.com"),
                             const SizedBox(width: 1, height: 15),

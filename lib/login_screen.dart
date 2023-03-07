@@ -16,7 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
   String userName = '';
   String password='';
-  String error='';
+  bool error=false;
   BuildContext? mContext;
 
   Future<void> login() async {
@@ -32,21 +32,27 @@ class _LoginScreenState extends State<LoginScreen> {
     });
     request.headers.addAll(headers);
 
-    http.StreamedResponse response = await request.send();
-
-    if (response.statusCode == 202) {
-      String jsonText=await response.stream.bytesToString();
-      JWT_TOKEN=jsonDecode(jsonText)['jwtToken'];
-      print("token updated to $JWT_TOKEN");
-      if(mContext!=null && Navigator.canPop(mContext!)){
-        Navigator.pop(mContext!);
+    try {
+      http.StreamedResponse response = await request.send();
+      if (response.statusCode == 202) {
+        String jsonText = await response.stream.bytesToString();
+        JWT_TOKEN = jsonDecode(jsonText)['jwtToken'];
+        print("token updated to $JWT_TOKEN");
+        if (mContext != null && Navigator.canPop(mContext!)) {
+          Navigator.pop(mContext!);
+        }
+        Navigator.push(
+            mContext!, MaterialPageRoute(builder: (context) => MainScreen()));
       }
-      Navigator.push(mContext!, MaterialPageRoute(builder: (context)=> MainScreen()));
-    }
-    else {
-      print(response.reasonPhrase);
+      else {
+        print(response.reasonPhrase);
+        setState(() {
+          error = true;
+        });
+      }
+    }catch(e){
       setState(() {
-        error="Invalid user name or password";
+        error=true;
       });
     }
   }
@@ -66,7 +72,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 ,
                 SizedBox(width:100,height:50),
                 TextField(
-                  decoration: const InputDecoration(
+                  decoration:  InputDecoration(
+                      errorText: error ? "Invalid user name": null,
                       border: OutlineInputBorder(), hintText: "user name"),
                   autofocus: true,
                   onChanged: (text) {
@@ -76,7 +83,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(width:100,height:10)
               ,
                 TextField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
+                      errorText: error ? "Invalid password": null,
                       border: OutlineInputBorder(), hintText: "*******"),
                   autofocus: true,
                   onChanged: (text) {
@@ -87,8 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(
                     width: 100,
                     height: 50,
-                    child: ElevatedButton(onPressed: login, child: Text("Login"))),
-                Text(error,style: TextStyle(color:Colors.red),)
+                    child: ElevatedButton(onPressed: login, child: Text("Login")))
               ],
             ),
           ),
